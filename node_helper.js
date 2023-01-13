@@ -21,11 +21,12 @@ module.exports = NodeHelper.create({
 	// subclass socketNotificationReceived method
 	socketNotificationReceived: function(notification, payload) {
 		if (notification === "GET_HOROSCOPE_DATA") {
-			var query = "{\"sign\":\"" + payload.sign.substring(0,3) + "\",\"frequency\":\"daily\",\"date\":\"" + payload.date + "\",\"week\":\"\",\"month\":\"\"}";
-			var options = {
-				url: "https://www.yahoo.com/_td/api/resource/horoscope.astro;query=" + encodeURIComponent(query) + ";site=horoscope"
-			};
-			this.getData(options);
+           var options = {
+                url: 'https://aztro.sameerkumar.website/?sign=' + payload.sign + '&day=today',
+                method: 'POST',
+                json: 'true'
+            };
+            this.getData(options);
 		}
 	},
 
@@ -33,7 +34,7 @@ module.exports = NodeHelper.create({
 	getData: function(options) {
 		request(options, (error, response, body) => {
 			if (response.statusCode === 200) {
-				this.sendSocketNotification("HOROSCOPE_DATA", JSON.parse(body));
+				this.sendSocketNotification("HOROSCOPE_DATA", body);
 			} else {
 				this.sendSocketNotification("HOROSCOPE_DATA");
 				console.log("Error getting Horoscope data. Response:" + JSON.stringify(response));

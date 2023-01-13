@@ -76,12 +76,6 @@ Module.register("MMM-horoscope",{
 		return ["MMM-horoscope.css"];
 	},
 
-	getScripts: function() {
-		return [
-			"moment.js"
-		];
-	},
-
 	start: function() {
 		Log.info("Starting module: " + this.name);
 		if (this.config.debug) {
@@ -98,14 +92,15 @@ Module.register("MMM-horoscope",{
 
 	updateHoroscope: function() {
 		this.date = new Date();
-		this.sendSocketNotification("GET_HOROSCOPE_DATA", { sign: this.config.sign, date: moment(this.date).add(this.config.timeShift, "milliseconds").format("YYYYMMDD") });
+		this.sendSocketNotification("GET_HOROSCOPE_DATA", {
+				sign: this.config.sign });
 	},
 
 
 	// Subclass socketNotificationReceived method.
 	socketNotificationReceived: function(notification, payload){
 		if(notification === "HOROSCOPE_DATA" && payload != null){
-			this.horoscopeData = payload[0];
+			this.horoscopeData = payload;
 			this.processHoroscope(this.horoscopeData);
 		} else {
 			this.processHoroscopeError("Unable to get horoscope from API. Please check the logs.");
@@ -113,12 +108,10 @@ Module.register("MMM-horoscope",{
 	},
 
 	processHoroscope: function(data) {
-		const regex = /<a.*\/a>/g;
-		const subst = "";
 		this.sign = this.config.zodiacTable[this.config.sign]["unicodeChar"];
-		this.signText = data.sign;
-		this.horoscopeText = data.overview.replace(regex, subst).trim();
-		this.horoscopeDate = data.frequencyValue
+		this.signText = this.config.sign;
+		this.horoscopeText = data.description;
+		this.horoscopeDate = data.current_date;
 		this.loaded = true;
 		this.updateDom(this.config.animationSpeed);
 		this.scheduleUpdate();
@@ -176,7 +169,7 @@ Module.register("MMM-horoscope",{
 
 		var horoscopeDate = document.createElement("div");
 		horoscopeDate.className = "horoscope-date xsmall";
-		horoscopeDate.innerHTML = "Horoscope for " + moment(this.horoscopeDate).format("LL");
+		horoscopeDate.innerHTML = "Horoscope for " + this.horoscopeDate;
 
 		horoscopeTitle.appendChild(zodiacSignText);
 		horoscopeTitle.appendChild(horoscopeDate);
