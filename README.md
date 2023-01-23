@@ -1,23 +1,20 @@
 # MMM-horoscope
-Horoscope Module for MagicMirror² v.0.1.0
+Horoscope Module for MagicMirror²
 
 
-This is a module for [MagicMirror²](https://github.com/MichMich/MagicMirror) that adds daily horoscope pulled from the [Yahoo Style Horoscopes](https://www.yahoo.com/style/horoscope/). API endpoint used for this module is not officially supported and may break at any time.
-
-![screenshot](screenshot.png)
+This is a module for [MagicMirror²](https://github.com/MichMich/MagicMirror) that adds daily horoscope scraped from the [Astronomy.com](https://www.astronomy.com/).
 
 ## Dependencies
 
 npm modules (should already be available with your MM installation):
 
 - request
-- moment
 
 ## Installation steps
 
 ```
 cd ~/MagicMirror/modules
-git clone https://github.com/morozgrafix/MMM-horoscope.git
+git clone https://github.com/philking98/MMM-horoscope.git
 cd MMM-horoscope
 npm install
 ```
@@ -109,7 +106,3 @@ Since this module is using `node helper` you would need to **restart your MagicM
   </tbody>
 </table>
 
-
-## Support
-
-This is my very first MM module and I probably missed something obvious. Please get in touch with me if you have a suggestion or feature request. Feel free to file a [GitHub issue](https://github.com/morozgrafix/MMM-horoscope/issues)

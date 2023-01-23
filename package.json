@@ -10,12 +10,12 @@
     "MagicMirror",
     "Horoscope"
   ],
-  "author": "Sergey Morozov",
+  "author": "Philip King",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/philking98/MMM-horoscope/issues"
   },
-  "homepage": "https://github.com/morozgrafix/MMM-horoscope#readme",
+  "homepage": "https://github.com/philking98/MMM-horoscope#readme",
   "dependencies": {
     "request": "^2.78.0"
   }
