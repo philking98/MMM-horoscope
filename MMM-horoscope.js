@@ -78,16 +78,16 @@ Module.register("MMM-horoscope",{
 
 	start: function() {
 		Log.info("Starting module: " + this.name);
-		if (this.config.debug) {
-			this.config.updateInterval = 60 * 1000; // update very 1 minute for debug
-		}
+
 		// just in case someone puts mixed case in their config files
 		this.config.sign = this.config.sign.toLowerCase();
-		this.sign = null;
-		this.signText = null;
+		this.sign = this.config.zodiacTable[this.config.sign]["unicodeChar"];
+		this.signText = this.config.sign;
+
 		this.horoscopeText = null;
-		this.horoscpeDate = null;
-		this.scheduleUpdate(this.config.initialLoadDelay);
+		this.horoscopeDate = null;
+
+		this.updateHoroscope();
 	},
 
 	updateHoroscope: function() {
@@ -96,35 +96,48 @@ Module.register("MMM-horoscope",{
 				sign: this.config.sign });
 	},
 
-
-	// Subclass socketNotificationReceived method.
-	socketNotificationReceived: function(notification, payload){
-		if(notification === "HOROSCOPE_DATA" && payload != null){
-			this.horoscopeData = payload;
-			this.processHoroscope(this.horoscopeData);
-		} else {
-			this.processHoroscopeError("Unable to get horoscope from API. Please check the logs.");
+	notificationReceived: function(notification, payload, sender) {
+		if (notification === "DOM_OBJECTS_CREATED") {
+			this.updateHoroscope();
 		}
 	},
 
-	processHoroscope: function(data) {
-		this.sign = this.config.zodiacTable[this.config.sign]["unicodeChar"];
-		this.signText = this.config.sign;
-		this.horoscopeText = data.description;
-		this.horoscopeDate = data.current_date;
-		this.loaded = true;
-		this.updateDom(this.config.animationSpeed);
-		this.scheduleUpdate();
+	scheduleUpdate: function(delay) {
+		var nextLoad = this.config.updateInterval;
+		if (typeof delay !== "undefined" && delay >= 0) {
+			nextLoad = delay;
+		}
 
+		if (this.config.debug) {
+			nextLoad = 5 * 60 * 1000; // update very 5 minute for debug
+		}
+
+		Log.info("MMM-horoscope: nextLoad: ", nextLoad);
+		var self = this;
+/*		setTimeout(function() {
+			self.updateHoroscope();
+		}, nextLoad);
+
+		*/
 	},
 
-	processHoroscopeError: function(error) {
-		this.loaded = true;
-		this.error = true;
-		this.updateDom(this.config.animationSpeed);
-		Log.error("Process Horoscope Error: ", error);
-	},
+	// Subclass socketNotificationReceived method.
+	socketNotificationReceived: function(notification, payload){
+		if (notification === "HOROSCOPE_DATA") {
+			this.loaded = true;
+			if (payload != null) {
+				this.error = false;
 
+				this.horoscopeText = payload.text;
+				this.horoscopeDate = payload.date; // data.current_date;
+			} else {
+				this.error = true;
+				Log.error("MMM-horoscope: Unable to get horoscope from API.");
+			}
+			this.updateDom(this.config.animationSpeed);
+			this.scheduleUpdate();
+		}
+	},
 
 	getDom: function() {
 		var wrapper = document.createElement("div");
@@ -144,7 +157,7 @@ Module.register("MMM-horoscope",{
 		}
 
 		if (this.error) {
-			wrapper.innerHTML = this.name + ": Something went wrong. Please check logs.";
+			wrapper.innerHTML = "Something went wrong. Please check logs.";
 			wrapper.className = "bright light small";
 			return wrapper;
 		}
@@ -185,17 +198,5 @@ Module.register("MMM-horoscope",{
 		wrapper.appendChild(horoscopeText);
 
 		return wrapper;
-	},
-
-	scheduleUpdate: function(delay) {
-		var nextLoad = this.config.updateInterval;
-		if (typeof delay !== "undefined" && delay >= 0) {
-			nextLoad = delay;
-		}
-
-		var self = this;
-		setTimeout(function() {
-			self.updateHoroscope();
-		}, nextLoad);
 	}
 });
