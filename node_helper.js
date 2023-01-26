@@ -64,7 +64,7 @@ module.exports = NodeHelper.create({
 				console.log("Error getting Horoscope data. Response:" + JSON.stringify(response));
 			})
 			.finally(() => {
-				this.getting_horoscope_date = false;
+				this.getting_horoscope_data = false;
 			});
 	}
 });
