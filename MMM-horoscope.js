@@ -1,7 +1,6 @@
 Module.register("MMM-horoscope",{
 	defaults: {
 		sign: "aries",
-		maxWidth: "400px", // maximum width of the module in px, %, em
 		updateInterval: 1 * 60 * 60 * 1000, // updates every hour
 		timeShift: 5 * 60 * 60 * 1000, // shift clock in milliseconds to start showing next day horoscope at 7pm (24 - 19 = 5)
 		useTextIcon: true,
@@ -96,12 +95,6 @@ Module.register("MMM-horoscope",{
 				sign: this.config.sign });
 	},
 
-	notificationReceived: function(notification, payload, sender) {
-		if (notification === "DOM_OBJECTS_CREATED") {
-			this.updateHoroscope();
-		}
-	},
-
 	scheduleUpdate: function(delay) {
 		var nextLoad = this.config.updateInterval;
 		if (typeof delay !== "undefined" && delay >= 0) {
@@ -129,7 +122,7 @@ Module.register("MMM-horoscope",{
 				this.error = false;
 
 				this.horoscopeText = payload.text;
-				this.horoscopeDate = payload.date; // data.current_date;
+				this.horoscopeDate = payload.date;
 			} else {
 				this.error = true;
 				Log.error("MMM-horoscope: Unable to get horoscope from API.");
@@ -140,9 +133,8 @@ Module.register("MMM-horoscope",{
 	},
 
 	getDom: function() {
-		var wrapper = document.createElement("div");
+		let wrapper = document.createElement("div");
 		wrapper.className = "horoscope-wrapper"
-		wrapper.style["max-width"] = this.config.maxWidth;
 
 		if (this.config.sign === "") {
 			wrapper.innerHTML = "Please set the correct Zodiac <i>sign</i> in the config for module: " + this.name + ".";
@@ -162,10 +154,10 @@ Module.register("MMM-horoscope",{
 			return wrapper;
 		}
 
-		var horoscopeTop = document.createElement("div");
+		let horoscopeTop = document.createElement("div");
 		horoscopeTop.className = "horoscope-top";
 
-		var zodiacIcon = document.createElement("div");
+		let zodiacIcon = document.createElement("div");
 		if (this.config.useTextIcon) {
 			zodiacIcon.className = "zodiac-text-icon";
 			zodiacIcon.innerHTML = this.sign;
@@ -173,15 +165,15 @@ Module.register("MMM-horoscope",{
 			zodiacIcon.className = "zodiac-icon " + this.config.sign;
 		}
 
-		var horoscopeTitle = document.createElement("div");
-		horoscopeTitle.className = "horoscope-title align-right";
+		let horoscopeTitle = document.createElement("div");
+		horoscopeTitle.className = "horoscope-title";
 
-		var zodiacSignText = document.createElement("div");
-		zodiacSignText.className = "zodiac-sign-text medium";
+		let zodiacSignText = document.createElement("div");
+		zodiacSignText.className = "zodiac-sign-text";
 		zodiacSignText.innerHTML = this.signText;
 
-		var horoscopeDate = document.createElement("div");
-		horoscopeDate.className = "horoscope-date xsmall";
+		let horoscopeDate = document.createElement("div");
+		horoscopeDate.className = "horoscope-date";
 		horoscopeDate.innerHTML = "Horoscope for " + this.horoscopeDate;
 
 		horoscopeTitle.appendChild(zodiacSignText);
@@ -190,11 +182,11 @@ Module.register("MMM-horoscope",{
 		horoscopeTop.appendChild(zodiacIcon);
 		horoscopeTop.appendChild(horoscopeTitle);
 
-		wrapper.appendChild(horoscopeTop);
-
-		var horoscopeText = document.createElement("div");
-		horoscopeText.className = "horoscope-text small";
+		let horoscopeText = document.createElement("div");
+		horoscopeText.className = "horoscope-text";
 		horoscopeText.innerHTML = this.horoscopeText;
+
+		wrapper.appendChild(horoscopeTop);
 		wrapper.appendChild(horoscopeText);
 
 		return wrapper;
