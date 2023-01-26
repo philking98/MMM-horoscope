@@ -9,7 +9,7 @@
  *
  */
 
-const request = require("request");
+const fetch = require("node-fetch");
 const NodeHelper = require("node_helper");
 
 module.exports = NodeHelper.create({
@@ -24,12 +24,7 @@ module.exports = NodeHelper.create({
 		if (notification === "GET_HOROSCOPE_DATA") {
 			if (!this.getting_horoscope_data) {
 				this.getting_horoscope_data = true;
-
-				var options = {
-					url: 'https://www.astrology.com/horoscope/daily/' + payload.sign +'.html',
-					method: 'GET'
-				};
-				this.getData(options);
+				this.getHoroscope(payload.sign);
 			}
 			else {
 				console.log("HOROSCOPE_DATA: alreading getting horoscope data");
@@ -37,15 +32,23 @@ module.exports = NodeHelper.create({
 	},
 
 	// get data from URL and broadcast it to MagicMirror module if everyting is OK
-	getData: function(options) {
-		request(options, (error, response, body) => {
-			if ((typeof response.statusCode !== 'undefined') &&
-					(response.statusCode === 200)) {
+	getHoroscope: function(sign) {
+
+		let url = 'https://www.astrology.com/horoscope/daily/' + sign +'.html';
+
+		fetch(url)
+			.then((response) => response.text())
+			.then((body) => {
 
 				let startPattern = "<div id=\"content\">";
 				let start = body.search(startPattern);
 				let stop = (body.slice(start)).search("</div>");
 				let horoscopeText = body.slice(start + startPattern.length, start + stop);
+
+				startPattern = "<span style=\"font-weight: 400\">";
+				start = horoscopeText.search(startPattern);
+				stop = (horoscopeText.slice(start)).search("</span>");
+				horoscopeText = horoscopeText.slice(start + startPattern.length, start + stop);
 
 				startPattern = "<span id=\"content-date\">";
 				start = body.search(startPattern);
@@ -55,11 +58,13 @@ module.exports = NodeHelper.create({
 				this.sendSocketNotification("HOROSCOPE_DATA", {
 						text: horoscopeText,
 						date: horoscopeDate });
-			} else {
+			})
+			.catch((error) => {
 				this.sendSocketNotification("HOROSCOPE_DATA");
 				console.log("Error getting Horoscope data. Response:" + JSON.stringify(response));
-			}
-			this.getting_horoscope_data = false;
-		});
+			})
+			.finally(() => {
+				this.getting_horoscope_date = false;
+			});
 	}
 });
