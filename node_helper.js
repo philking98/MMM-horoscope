@@ -9,7 +9,7 @@
  *
  */
 
-const fetch = require("node-fetch");
+//const fetch = require("node-fetch");
 const NodeHelper = require("node_helper");
 
 module.exports = NodeHelper.create({
@@ -22,20 +22,15 @@ module.exports = NodeHelper.create({
 	socketNotificationReceived: function(notification, payload) {
 
 		if (notification === "GET_HOROSCOPE_DATA") {
-			if (!this.getting_horoscope_data) {
-				this.getting_horoscope_data = true;
-				this.getHoroscope(payload);
-			}
-			else {
-				console.log("HOROSCOPE_DATA: alreading getting horoscope data");
-		} }
+			this.getHoroscope(payload);
+		}
 	},
 
 	// get data from URL and broadcast it to MagicMirror module if everyting is OK
 	getHoroscope: function(payload) {
 
 		let url = 'https://www.astrology.com/horoscope/daily/' + payload.sign +'.html';
-
+		console.log("requesting data for id="+payload.id)
 		fetch(url)
 			.then((response) => response.text())
 			.then((body) => {
@@ -55,6 +50,7 @@ module.exports = NodeHelper.create({
 				stop = (body.slice(start)).search("</span>");
 				let horoscopeDate = body.slice(start + startPattern.length, start + stop);
 
+				console.log("sending response for id="+payload.id)
 				this.sendSocketNotification("HOROSCOPE_DATA", {id:payload.id,
 						text: horoscopeText,
 						date: horoscopeDate });
