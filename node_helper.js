@@ -24,7 +24,7 @@ module.exports = NodeHelper.create({
 		if (notification === "GET_HOROSCOPE_DATA") {
 			if (!this.getting_horoscope_data) {
 				this.getting_horoscope_data = true;
-				this.getHoroscope(payload.sign);
+				this.getHoroscope(payload);
 			}
 			else {
 				console.log("HOROSCOPE_DATA: alreading getting horoscope data");
@@ -32,9 +32,9 @@ module.exports = NodeHelper.create({
 	},
 
 	// get data from URL and broadcast it to MagicMirror module if everyting is OK
-	getHoroscope: function(sign) {
+	getHoroscope: function(payload) {
 
-		let url = 'https://www.astrology.com/horoscope/daily/' + sign +'.html';
+		let url = 'https://www.astrology.com/horoscope/daily/' + payload.sign +'.html';
 
 		fetch(url)
 			.then((response) => response.text())
@@ -55,12 +55,12 @@ module.exports = NodeHelper.create({
 				stop = (body.slice(start)).search("</span>");
 				let horoscopeDate = body.slice(start + startPattern.length, start + stop);
 
-				this.sendSocketNotification("HOROSCOPE_DATA", {
+				this.sendSocketNotification("HOROSCOPE_DATA", {id:payload.id,
 						text: horoscopeText,
 						date: horoscopeDate });
 			})
 			.catch((error) => {
-				this.sendSocketNotification("HOROSCOPE_DATA");
+				this.sendSocketNotification("HOROSCOPE_DATA", {id:payload.id});
 				console.log("Error getting Horoscope data. Response:" + JSON.stringify(response));
 			})
 			.finally(() => {

@@ -91,7 +91,7 @@ Module.register("MMM-horoscope",{
 
 	updateHoroscope: function() {
 		this.date = new Date();
-		this.sendSocketNotification("GET_HOROSCOPE_DATA", {
+		this.sendSocketNotification("GET_HOROSCOPE_DATA", { id: this.identifier,
 				sign: this.config.sign });
 	},
 
@@ -117,18 +117,22 @@ Module.register("MMM-horoscope",{
 	// Subclass socketNotificationReceived method.
 	socketNotificationReceived: function(notification, payload){
 		if (notification === "HOROSCOPE_DATA") {
-			this.loaded = true;
-			if (payload != null) {
-				this.error = false;
+			// is this response for this instance?
+			if(payload.id == this.identifier){
+				this.loaded = true;
+				// id, text , date
+				if (Object.keys(payload).length==3) {
+					this.error = false;
 
-				this.horoscopeText = payload.text;
-				this.horoscopeDate = payload.date;
-			} else {
-				this.error = true;
-				Log.error("MMM-horoscope: Unable to get horoscope from API.");
+					this.horoscopeText = payload.text;
+					this.horoscopeDate = payload.date;
+				} else {
+					this.error = true;
+					Log.error("MMM-horoscope: Unable to get horoscope from API.");
+				}
+				this.updateDom(this.config.animationSpeed);
+				this.scheduleUpdate();
 			}
-			this.updateDom(this.config.animationSpeed);
-			this.scheduleUpdate();
 		}
 	},
 
