@@ -8,8 +8,14 @@
  * Based on https://github.com/fewieden/MMM-soccer/blob/master/node_helper.js
  *
  */
+// watch out for node 18+ supplying fetch built in
+// assume we have it
+var fetchit=fetch
+// if we DON'T have it
+if(fetchit === undefined)
+	// then load something that will work
+  fetchit = require("node-fetch");
 
-//const fetch = require("node-fetch");
 const NodeHelper = require("node_helper");
 
 module.exports = NodeHelper.create({
@@ -31,7 +37,7 @@ module.exports = NodeHelper.create({
 
 		let url = 'https://www.astrology.com/horoscope/daily/' + payload.sign +'.html';
 		console.log("requesting data for id="+payload.id)
-		fetch(url)
+		fetchit(url)
 			.then((response) => response.text())
 			.then((body) => {
 
