@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/philking98/MMM-horoscope#readme",
   "dependencies": {
+    "node-fetch": "^2.7.0",
     "request": "^2.78.0"
   }
 }

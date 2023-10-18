@@ -8,8 +8,14 @@
  * Based on https://github.com/fewieden/MMM-soccer/blob/master/node_helper.js
  *
  */
+// watch out for node 18+ supplying fetch built in
+// assume we have it
+var fetchit=fetch
+// if we DON'T have it
+if(fetchit === undefined)
+	// then load something that will work
+  fetchit = require("node-fetch");
 
-const fetch = require("node-fetch");
 const NodeHelper = require("node_helper");
 
 module.exports = NodeHelper.create({
@@ -22,21 +28,16 @@ module.exports = NodeHelper.create({
 	socketNotificationReceived: function(notification, payload) {
 
 		if (notification === "GET_HOROSCOPE_DATA") {
-			if (!this.getting_horoscope_data) {
-				this.getting_horoscope_data = true;
-				this.getHoroscope(payload.sign);
-			}
-			else {
-				console.log("HOROSCOPE_DATA: alreading getting horoscope data");
-		} }
+			this.getHoroscope(payload);
+		}
 	},
 
 	// get data from URL and broadcast it to MagicMirror module if everyting is OK
-	getHoroscope: function(sign) {
+	getHoroscope: function(payload) {
 
-		let url = 'https://www.astrology.com/horoscope/daily/' + sign +'.html';
-
-		fetch(url)
+		let url = 'https://www.astrology.com/horoscope/daily/' + payload.sign +'.html';
+		console.log("requesting data for id="+payload.id)
+		fetchit(url)
 			.then((response) => response.text())
 			.then((body) => {
 
@@ -55,12 +56,13 @@ module.exports = NodeHelper.create({
 				stop = (body.slice(start)).search("</span>");
 				let horoscopeDate = body.slice(start + startPattern.length, start + stop);
 
-				this.sendSocketNotification("HOROSCOPE_DATA", {
+				console.log("sending response for id="+payload.id)
+				this.sendSocketNotification("HOROSCOPE_DATA", {id:payload.id,
 						text: horoscopeText,
 						date: horoscopeDate });
 			})
 			.catch((error) => {
-				this.sendSocketNotification("HOROSCOPE_DATA");
+				this.sendSocketNotification("HOROSCOPE_DATA", {id:payload.id});
 				console.log("Error getting Horoscope data. Response:" + JSON.stringify(response));
 			})
 			.finally(() => {
